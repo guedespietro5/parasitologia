@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: corinthians
+      POSTGRES_PASSWORD: durinhodematar
+      POSTGRES_DB: parasitologia
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./server
+    container_name: back
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://corinthians:durinhodematar@postgres_db:5432/parasitologia?schema=public"
+      S3_ENDPOINT: "http://minio:9000"
+      S3_ACCESS_KEY: "admin"
+      S3_SECRET_KEY: "admin123"
+      S3_BUCKET: "posts"
+    depends_on:
+      - postgres
+      - minio
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+
+volumes:
+  pgdata:
+  minio_data:
