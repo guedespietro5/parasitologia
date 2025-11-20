@@ -1,9 +1,10 @@
 import express from "express";
-const app = express();
+import roleRoutes from "./routes/role.routes";
 
-app.get("/", (req, res) => {
-  res.send("API rodando!");
-});
+const app = express();
+app.use(express.json());
+
+app.use("/roles", roleRoutes);
 
 app.listen(3000, () => {
   console.log("Servidor rodando na porta 3000");
