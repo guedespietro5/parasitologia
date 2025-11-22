@@ -26,6 +26,14 @@ services:
       - postgres
       - minio
 
+  ui:
+    build: ./ui
+    container_name: ui
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
   minio:
     image: minio/minio
     container_name: minio
