@@ -28,8 +28,13 @@ import {
   Pets,
   CompareArrows,
   Close,
+  AttachFile,
+  Delete,
+  PictureAsPdf,
+  Description,
 } from '@mui/icons-material';
 import { postService } from '../services/api';
+import AttachmentsViewer from './AttachmentsViewer';
 
 function ValidatePostsDialog({ open, onClose, onValidate }) {
   const [pendingPosts, setPendingPosts] = useState([]);
@@ -48,6 +53,19 @@ function ValidatePostsDialog({ open, onClose, onValidate }) {
       setLoading(true);
       setError('');
       const posts = await postService.getPendingPosts();
+      
+      // DEBUG: Ver estrutura dos posts
+      console.log('===== POSTS PENDENTES =====');
+      console.log('Total de posts:', posts.length);
+      if (posts.length > 0) {
+        console.log('Primeiro post completo:', posts[0]);
+        console.log('Author:', posts[0].author);
+        console.log('ParasiteAgent:', posts[0].parasiteAgent);
+        console.log('Host:', posts[0].host);
+        console.log('Transmission:', posts[0].transmission);
+      }
+      console.log('===========================');
+      
       setPendingPosts(posts);
     } catch (err) {
       console.error('Erro ao carregar posts pendentes:', err);
@@ -208,6 +226,13 @@ function ValidatePostsDialog({ open, onClose, onValidate }) {
                   <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
                     {post.content}
                   </Typography>
+
+                  {/* Exibir anexos se existirem */}
+                  {post.attachments && (
+                    <AttachmentsViewer 
+                      attachments={typeof post.attachments === 'string' ? JSON.parse(post.attachments) : post.attachments} 
+                    />
+                  )}
                 </CardContent>
 
                 <Divider />

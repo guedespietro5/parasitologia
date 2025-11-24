@@ -9,13 +9,11 @@ const api = axios.create({
   },
 });
 
-// Interceptor para adicionar token nas requisições autenticadas
 api.interceptors.request.use((config) => {
-  // Não adiciona token para rotas públicas
   const publicRoutes = ['/auth/login', '/users', '/post'];
   const isPublicRoute = publicRoutes.some(route => 
     config.url.startsWith(route) && config.method === 'get'
-  ) || config.url === '/auth/login' || (config.url === '/users' && config.method === 'post');
+  ) || config.url === '/auth/login' || (config.url === 's' && config.method === 'post');
   
   if (!isPublicRoute) {
     const token = localStorage.getItem('token');
@@ -145,6 +143,19 @@ export const uploadService = {
     formData.append('file', file);
     
     const response = await api.post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  },
+
+  uploadDocument: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await api.post('/upload/document', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

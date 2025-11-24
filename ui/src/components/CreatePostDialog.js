@@ -12,8 +12,14 @@ import {
   CircularProgress,
   Autocomplete,
   Chip,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemSecondaryAction,
 } from '@mui/material';
-import { CloudUpload, MenuBook } from '@mui/icons-material';
+import { CloudUpload, MenuBook, AttachFile, Delete, PictureAsPdf, Description } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
 import { 
   postService, 
@@ -40,6 +46,9 @@ function CreatePostDialog({ open, onClose, onCreatePost, user }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  
+  const [selectedFiles, setSelectedFiles] = useState([]); // Arquivos selecionados
+  const [uploadingFiles, setUploadingFiles] = useState(false); // Estado de upload
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -94,6 +103,47 @@ function CreatePostDialog({ open, onClose, onCreatePost, user }) {
     },
     maxFiles: 1,
   });
+
+  const handleFileSelect = (event) => {
+    const files = Array.from(event.target.files);
+    const validFiles = files.filter(file => {
+      const isValidType = file.type === 'application/pdf' || 
+                          file.type === 'application/msword' ||
+                          file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
+      
+      if (!isValidType) {
+        setError('Apenas arquivos PDF e Word são permitidos');
+        return false;
+      }
+      if (!isValidSize) {
+        setError('Arquivo muito grande. Máximo 10MB');
+        return false;
+      }
+      return true;
+    });
+
+    setSelectedFiles([...selectedFiles, ...validFiles]);
+  };
+
+  const handleRemoveFile = (index) => {
+    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+  };
+
+  const getFileIcon = (file) => {
+    if (file.type === 'application/pdf') {
+      return <PictureAsPdf sx={{ color: '#d32f2f' }} />;
+    }
+    return <Description sx={{ color: '#1976d2' }} />;
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -169,6 +219,22 @@ function CreatePostDialog({ open, onClose, onCreatePost, user }) {
         setUploadingImage(false);
       }
 
+      // Upload dos arquivos anexados se houver
+      let attachments = [];
+      if (selectedFiles.length > 0) {
+        setUploadingFiles(true);
+        for (const file of selectedFiles) {
+          const uploadResponse = await uploadService.uploadDocument(file);
+          attachments.push({
+            name: file.name,
+            url: uploadResponse.url || uploadResponse.documentUrl,
+            type: file.type,
+            size: file.size,
+          });
+        }
+        setUploadingFiles(false);
+      }
+
       // Criar novos itens se necessário
       let parasiteAgentId = formData.parasiteAgentId;
       let hostId = formData.hostId;
@@ -211,6 +277,7 @@ function CreatePostDialog({ open, onClose, onCreatePost, user }) {
         parasiteAgentId: parasiteAgentId,
         hostId: hostId,
         transmissionId: transmissionId,
+        attachments: JSON.stringify(attachments), // Converter para JSON string
       };
 
       console.log('Enviando post:', postData);
@@ -244,6 +311,7 @@ function CreatePostDialog({ open, onClose, onCreatePost, user }) {
     });
     setSelectedImage(null);
     setImagePreview(null);
+    setSelectedFiles([]); // Limpar arquivos anexados
     setError('');
     onClose();
   };
@@ -491,6 +559,72 @@ function CreatePostDialog({ open, onClose, onCreatePost, user }) {
                     )}
                   </Box>
                 </Box>
+
+                {/* Upload de Documentos (PDF/Word) */}
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Documentos Anexos (opcional)
+                  </Typography>
+                  <Box
+                    sx={{
+                      border: '2px dashed #697E50',
+                      borderRadius: 2,
+                      p: 2,
+                      textAlign: 'center',
+                    }}
+                  >
+                    <input
+                      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      style={{ display: 'none' }}
+                      id="file-upload"
+                      type="file"
+                      multiple
+                      onChange={handleFileSelect}
+                    />
+                    <label htmlFor="file-upload">
+                      <Button
+                        variant="outlined"
+                        component="span"
+                        startIcon={<AttachFile />}
+                        sx={{
+                          color: '#697E50',
+                          borderColor: '#697E50',
+                          '&:hover': {
+                            borderColor: '#4E653D',
+                            bgcolor: 'rgba(105, 126, 80, 0.05)',
+                          },
+                        }}
+                      >
+                        Anexar PDF ou Word
+                      </Button>
+                    </label>
+                    <Typography variant="caption" display="block" sx={{ mt: 1, color: 'text.secondary' }}>
+                      Máximo 10MB por arquivo
+                    </Typography>
+                  </Box>
+
+                  {/* Lista de arquivos selecionados */}
+                  {selectedFiles.length > 0 && (
+                    <List sx={{ mt: 2, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+                      {selectedFiles.map((file, index) => (
+                        <ListItem key={index}>
+                          <ListItemIcon>
+                            {getFileIcon(file)}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={file.name}
+                            secondary={formatFileSize(file.size)}
+                          />
+                          <ListItemSecondaryAction>
+                            <IconButton edge="end" onClick={() => handleRemoveFile(index)}>
+                              <Delete />
+                            </IconButton>
+                          </ListItemSecondaryAction>
+                        </ListItem>
+                      ))}
+                    </List>
+                  )}
+                </Box>
               </>
             )}
           </Box>
@@ -515,6 +649,8 @@ function CreatePostDialog({ open, onClose, onCreatePost, user }) {
           >
             {loading ? (
               <CircularProgress size={24} sx={{ color: 'white' }} />
+            ) : uploadingFiles ? (
+              'Enviando documentos...'
             ) : uploadingImage ? (
               'Enviando imagem...'
             ) : (

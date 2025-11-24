@@ -26,8 +26,17 @@ export class PostController {
     return res.json(users);
   };
 
-   create = async (req: Request, res: Response) => {
-    const { title, content, imageUrl, authorId, parasiteAgentId, hostId, transmissionId } = req.body;
+  create = async (req: Request, res: Response) => {
+    const { 
+      title, 
+      content, 
+      imageUrl, 
+      authorId, 
+      parasiteAgentId, 
+      hostId, 
+      transmissionId,
+      attachments // Adicionar attachments
+    } = req.body;
 
     const newPost = await this.service.create({
       title,
@@ -37,6 +46,7 @@ export class PostController {
       parasiteAgentId,
       hostId,
       transmissionId,
+      attachments, // Passar attachments
     });
 
     return res.status(201).json(newPost);
@@ -53,10 +63,19 @@ export class PostController {
     return res.json(updatedPost);
   };
 
-
   update = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    const { title, content, imageUrl, authorId, validated, parasiteAgentId, hostId, transmissionId } = req.body;
+    const { 
+      title, 
+      content, 
+      imageUrl, 
+      authorId, 
+      validated, 
+      parasiteAgentId, 
+      hostId, 
+      transmissionId,
+      attachments // Adicionar attachments
+    } = req.body;
 
     const updatedPost = await this.service.update(id, {
       title,
@@ -67,12 +86,12 @@ export class PostController {
       parasiteAgentId,
       hostId,
       transmissionId,
+      attachments, // Passar attachments
     });
 
     return res.json(updatedPost);
   };
   
-
   delete = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     await this.service.delete(id);

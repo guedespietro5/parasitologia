@@ -6,7 +6,12 @@ const router = Router();
 
 // Configurar Multer para armazenar em memória
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB
+  }
+});
 
 // Extrair endpoint e porta corretamente
 const s3Endpoint = process.env.S3_ENDPOINT || "http://localhost:9000";
@@ -56,7 +61,7 @@ const ensureBucketExists = async () => {
 // Executar ao iniciar
 ensureBucketExists();
 
-// Rota de upload
+// Rota de upload de IMAGENS
 router.post("/", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
@@ -88,6 +93,62 @@ router.post("/", upload.single("file"), async (req, res) => {
   } catch (error) {
     console.error("❌ Erro no upload:", error);
     res.status(500).json({ message: "Erro ao fazer upload da imagem" });
+  }
+});
+
+// Rota de upload de DOCUMENTOS (PDF/Word)
+router.post("/document", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "Nenhum documento enviado" });
+    }
+
+    const file = req.file;
+    
+    // Validar tipo de arquivo
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      return res.status(400).json({ 
+        message: "Tipo de arquivo não permitido. Apenas PDF e Word são aceitos." 
+      });
+    }
+
+    // Nome único para o arquivo
+    const uniqueFileName = `${Date.now()}-${file.originalname}`;
+    
+    // Caminho completo no MinIO (com pasta attachments/)
+    const minioPath = `attachments/${uniqueFileName}`;
+
+    // Upload para MinIO
+    await minioClient.putObject(
+      bucketName,
+      minioPath,
+      file.buffer,
+      file.size,
+      {
+        "Content-Type": file.mimetype,
+      }
+    );
+
+    // URL pública (SEM a pasta attachments, pois a rota já adiciona)
+    const publicUrl = `http://localhost:3000/documents/${uniqueFileName}`;
+
+    res.json({
+      message: "Upload de documento realizado com sucesso",
+      url: publicUrl,
+      documentUrl: publicUrl,
+      fileName: minioPath, // Caminho completo para debug
+      type: file.mimetype,
+      size: file.size,
+    });
+  } catch (error) {
+    console.error("❌ Erro no upload do documento:", error);
+    res.status(500).json({ message: "Erro ao fazer upload do documento" });
   }
 });
 

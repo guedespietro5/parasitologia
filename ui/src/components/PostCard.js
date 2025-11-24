@@ -4,19 +4,24 @@ import {
   CardHeader,
   CardMedia,
   CardContent,
+  CardActions,
   Avatar,
   Typography,
   Box,
   Chip,
   Stack,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   BugReport,
   Pets,
   CompareArrows,
+  Delete,
 } from '@mui/icons-material';
+import AttachmentsViewer from './AttachmentsViewer';
 
-function PostCard({ post }) {
+function PostCard({ post, showValidationStatus, onDelete }) {
   // Gera avatar baseado no nome do autor
   const getAvatar = (name) => {
     if (!name) return '?';
@@ -48,6 +53,7 @@ function PostCard({ post }) {
       boxShadow: 3, 
       borderRadius: 2, 
       height: '750px', // Altura fixa para todos os cards
+      width: '100%', // Largura 100%
       display: 'flex', 
       flexDirection: 'column' 
     }}>
@@ -58,9 +64,24 @@ function PostCard({ post }) {
           </Avatar>
         }
         title={
-          <Typography variant="h6" fontWeight="bold">
-            {post.author}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h6" fontWeight="bold">
+              {post.author}
+            </Typography>
+            {showValidationStatus && (
+              <Chip
+                label={post.validated ? "APROVADO" : "PENDENTE"}
+                size="small"
+                sx={{
+                  bgcolor: post.validated ? '#4caf50' : '#ff9800',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '0.65rem',
+                  height: '20px',
+                }}
+              />
+            )}
+          </Box>
         }
         subheader={
           <Typography variant="caption" color="text.secondary">
@@ -154,8 +175,34 @@ function PostCard({ post }) {
           <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
             {post.content}
           </Typography>
+
+          {/* Exibir anexos se existirem */}
+          {post.attachments && (
+            <AttachmentsViewer 
+              attachments={typeof post.attachments === 'string' ? JSON.parse(post.attachments) : post.attachments} 
+            />
+          )}
         </Box>
       </CardContent>
+
+      {/* Botão de Excluir - só aparece se onDelete foi passado */}
+      {onDelete && (
+        <CardActions sx={{ justifyContent: 'flex-end', p: 2, bgcolor: '#f5f5f5' }}>
+          <Tooltip title="Excluir Post" arrow>
+            <IconButton
+              onClick={() => onDelete(post.id)}
+              sx={{
+                color: '#d32f2f',
+                '&:hover': {
+                  bgcolor: 'rgba(211, 47, 47, 0.1)',
+                },
+              }}
+            >
+              <Delete />
+            </IconButton>
+          </Tooltip>
+        </CardActions>
+      )}
     </Card>
   );
 }

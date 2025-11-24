@@ -196,7 +196,7 @@ function LoginDialog({ open, onClose, onLogin }) {
       <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
         <LoginIcon sx={{ fontSize: 48, color: '#697E50', mb: 1 }} />
         <Typography variant="h5" fontWeight="bold">
-          {isRegister ? 'Criar Conta' : 'Bem-vindo ao ParasitoBlog'}
+          {isRegister ? 'Criar Conta' : 'Bem-vindo(a)'}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           {isRegister 

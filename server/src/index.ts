@@ -9,6 +9,7 @@ import parasiteAgentRoutes from "./routes/parasiteAgent.routes";
 import transmissionRoutes from "./routes/transmission.routes";
 import uploadRoutes from "./routes/upload.routes";
 import imageRoutes from "./routes/image.routes";
+import documentRoutes from './routes/document.routes';
 
 import { authMiddleware } from "./middleware/auth";
 
@@ -32,6 +33,7 @@ app.use("/parasiteAgent", authMiddleware, parasiteAgentRoutes);
 app.use("/transmission", authMiddleware, transmissionRoutes);
 app.use("/upload", authMiddleware, uploadRoutes);
 app.use("/images", imageRoutes);
+app.use('/documents', documentRoutes);
 
 app.listen(3000, () => {
   console.log("Rodando essa porra");

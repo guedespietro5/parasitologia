@@ -27,24 +27,25 @@ model User {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  validated Boolean  @default(false)
-
-  authorId  Int
-  author    User     @relation(fields: [authorId], references: [id])
-
-  /// Foreign Keys for parasite, host and transmission
-  parasiteAgentId Int
-  hostId          Int
-  transmissionId  Int
-
-  parasiteAgent ParasiteAgent @relation(fields: [parasiteAgentId], references: [id])
-  host           Host          @relation(fields: [hostId], references: [id])
-  transmission   Transmission  @relation(fields: [transmissionId], references: [id])
+  id               Int            @id @default(autoincrement())
+  title            String
+  content          String
+  imageUrl         String
+  createdAt        DateTime       @default(now())
+  validated        Boolean        @default(false)
+  attachments      String?        @db.Text
+  
+  authorId         Int
+  author           User           @relation(fields: [authorId], references: [id])
+  
+  parasiteAgentId  Int
+  parasiteAgent    ParasiteAgent  @relation(fields: [parasiteAgentId], references: [id])
+  
+  hostId           Int
+  host             Host           @relation(fields: [hostId], references: [id])
+  
+  transmissionId   Int
+  transmission     Transmission   @relation(fields: [transmissionId], references: [id])
 }
 
 model ParasiteAgent {
