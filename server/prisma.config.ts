@@ -1,9 +1,6 @@
-import { defineConfig } from '@prisma/config';
+import dotenv from 'dotenv';
+dotenv.config();
 
-export default defineConfig({
+export default {
   schema: './prisma/schema.prisma',
-  migrations: {
-    // URL do banco usada nas migrations
-    url: process.env.DATABASE_URL!,
-  },
-});
+};

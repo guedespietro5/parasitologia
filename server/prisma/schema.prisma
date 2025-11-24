@@ -3,7 +3,6 @@ generator client {
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -37,5 +36,34 @@ model Post {
 
   authorId  Int
   author    User     @relation(fields: [authorId], references: [id])
+
+  /// Foreign Keys for parasite, host and transmission
+  parasiteAgentId Int
+  hostId          Int
+  transmissionId  Int
+
+  parasiteAgent ParasiteAgent @relation(fields: [parasiteAgentId], references: [id])
+  host           Host          @relation(fields: [hostId], references: [id])
+  transmission   Transmission  @relation(fields: [transmissionId], references: [id])
 }
 
+model ParasiteAgent {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+
+  posts Post[]
+}
+
+model Host {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+
+  posts Post[]
+}
+
+model Transmission {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+
+  posts Post[]
+}

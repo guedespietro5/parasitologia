@@ -19,6 +19,10 @@ export class AuthService {
       { expiresIn: "1d" }
     );
 
-    return { token };
+    return { 
+      token,
+      roleId: user.roleId, 
+      userId: user.id,
+    };
   }
 }

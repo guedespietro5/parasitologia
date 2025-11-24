@@ -2,17 +2,15 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Helvetica;
-  text-shadow: #000 1px 1px;
-  color: #fff;
+}
+
+body {
+  font-family: 'Roboto', 'Segoe UI', 'Arial', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .App {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
-  background: url("assets/bg.webp") no-repeat;
-  background-size: cover;
-  background-position: center;
+  background-color: #f5f5f5;
 }

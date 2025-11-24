@@ -4,10 +4,12 @@ import { UserController } from "../controllers/UserController";
 const router = Router();
 const userController = new UserController();
 
-router.get("/", userController.getAll);
-router.get("/:id", userController.getById);
+import { authMiddleware } from "../middleware/auth";
+
+router.get("/", authMiddleware, userController.getAll);
+router.get("/:id", authMiddleware, userController.getById);
 router.post("/", userController.create);
-router.put("/:id", userController.update);
-router.delete("/:id", userController.delete);
+router.put("/:id", authMiddleware, userController.update);
+router.delete("/:id", authMiddleware, userController.delete);
 
 export default router;

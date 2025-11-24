@@ -4,6 +4,12 @@ import roleRoutes from "./routes/role.routes";
 import userRoutes from "./routes/user.routes";
 import postRoutes from "./routes/post.routes";
 import authRoutes from "./routes/auth.routes";
+import hostRoutes from "./routes/host.routes";
+import parasiteAgentRoutes from "./routes/parasiteAgent.routes";
+import transmissionRoutes from "./routes/transmission.routes";
+import uploadRoutes from "./routes/upload.routes";
+import imageRoutes from "./routes/image.routes";
+
 import { authMiddleware } from "./middleware/auth";
 
 const app = express();
@@ -19,8 +25,13 @@ app.use(cors({
 app.use("/auth", authRoutes);
 
 app.use("/roles", authMiddleware, roleRoutes);
-app.use("/users", authMiddleware, userRoutes);
-app.use("/post", authMiddleware, postRoutes);
+app.use("/users", userRoutes);
+app.use("/post", postRoutes);
+app.use("/host", authMiddleware, hostRoutes);
+app.use("/parasiteAgent", authMiddleware, parasiteAgentRoutes);
+app.use("/transmission", authMiddleware, transmissionRoutes);
+app.use("/upload", authMiddleware, uploadRoutes);
+app.use("/images", imageRoutes);
 
 app.listen(3000, () => {
   console.log("Rodando essa porra");
